@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Barangay Lumangbayan Online Service Portal</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+    <!-- =========================
+         WELCOME PAGE
+    ========================== -->
+
+    <section id="welcomePage" class="welcome-page">
+
+        <div class="welcome-box">
+
+            <img
+                src="logo.png"
+                alt="Barangay Lumangbayan Logo"
+                class="main-logo"
+            >
+
+            <h1>Barangay Lumangbayan</h1>
+
+            <h2>Online Service Portal</h2>
+
+            <p>
+                Access barangay services, submit document requests,
+                track your requests, and receive important announcements online.
+            </p>
+
+            <button
+                type="button"
+                class="sign-in-button"
+                onclick="showLogin()"
+            >
+                Sign In
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         LOGIN PAGE
+    ========================== -->
+
+    <section id="loginPage" class="login-page">
+
+        <div class="login-container">
+
+            <img
+                src="logo.png"
+                alt="Barangay Lumangbayan Logo"
+                class="login-logo"
+            >
+
+            <h1>Sign in to your account</h1>
+
+
+            <form onsubmit="login(event)">
+
+                <!-- EMAIL -->
+
+                <label for="email">
+                    Enter your email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="company.com"
+                    required
+                >
+
+
+                <!-- PASSWORD -->
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Password"
+                    required
+                >
+
+
+                <!-- LOGIN OPTIONS -->
+
+                <div class="login-options">
+
+                    <label class="remember">
+
+                        <input
+                            type="checkbox"
+                            id="rememberMe"
+                        >
+
+                        <span>Remember me</span>
+
+                    </label>
+
+
+                    <a
+                        href="#"
+                        onclick="forgotPassword(event)"
+                    >
+                        Forgot password?
+                    </a>
+
+                </div>
+
+
+                <!-- LOGIN BUTTON -->
+
+                <button
+                    type="submit"
+                    class="login-button"
+                >
+                    Sign in
+                </button>
+
+
+                <p id="loginMessage"></p>
+
+            </form>
+
+
+            <!-- SIGN UP -->
+
+            <p class="signup-text">
+
+                Don't have an account yet?
+
+                <a
+                    href="#"
+                    onclick="showRegister(event)"
+                >
+                    Sign up
+                </a>
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         REGISTER PAGE
+    ========================== -->
+
+    <section id="registerPage" class="register-page">
+
+        <div class="register-container">
+
+            <img
+                src="logo.png"
+                alt="Barangay Lumangbayan Logo"
+                class="register-logo"
+            >
+
+            <h1>Create an account</h1>
+
+            <p class="register-subtitle">
+                Register to access the Barangay Lumangbayan Online Service Portal.
+            </p>
+
+
+            <form onsubmit="registerAccount(event)">
+
+                <!-- USERNAME -->
+
+                <label for="registerUsername">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="registerUsername"
+                    placeholder="Enter your username"
+                    required
+                >
+
+
+                <!-- EMAIL -->
+
+                <label for="registerEmail">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="registerEmail"
+                    placeholder="company.com"
+                    required
+                >
+
+
+                <!-- PASSWORD -->
+
+                <label for="registerPassword">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Create a password"
+                    required
+                >
+
+
+                <!-- TERMS -->
+
+                <label class="terms">
+
+                    <input
+                        type="checkbox"
+                        id="terms"
+                        required
+                    >
+
+                    <span>
+                        I agree to the terms and conditions
+                    </span>
+
+                </label>
+
+
+                <!-- REGISTER BUTTON -->
+
+                <button
+                    type="submit"
+                    class="register-button"
+                >
+                    Register
+                </button>
+
+
+                <p id="registerMessage"></p>
+
+            </form>
+
+
+            <!-- BACK TO LOGIN -->
+
+            <p class="login-link-text">
+
+                Already have an account?
+
+                <a
+                    href="#"
+                    onclick="backToLogin(event)"
+                >
+                    Login
+                </a>
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="scrip.js"></script>
+
+</body>
+
+</html>
