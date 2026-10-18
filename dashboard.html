@@ -73,14 +73,15 @@ button:hover {
 }
 
 #requestForm {
-    display: none;
     background: white;
     padding: 20px;
     border-radius: 10px;
     margin-top: 25px;
 }
 
-input {
+input,
+select,
+textarea {
     width: 100%;
     padding: 12px;
     margin: 7px 0 12px;
@@ -88,14 +89,61 @@ input {
     border-radius: 5px;
 }
 
+.page[hidden] {
+    display: none;
+}
+
+.back-button {
+    background: #52635a;
+}
+
 .request-status {
     color: #9a6700;
     font-weight: bold;
 }
 
+.status-update {
+    border-left: 3px solid #176b3a;
+    padding-left: 10px;
+}
+
+.prototype-note {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 10px 25px 0;
+    color: #5d4b19;
+    font-size: 13px;
+}
+
 .logout {
     background: #a52828;
     margin-top: 20px;
+}
+
+.account-bar,
+.dashboard-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.account-bar .logout {
+    margin-top: 0;
+}
+
+.dashboard-nav {
+    justify-content: flex-start;
+    margin-bottom: 20px;
+}
+
+.status-select {
+    max-width: 220px;
+}
+
+.announcement-body {
+    white-space: pre-wrap;
 }
 
 @media (max-width: 500px) {
@@ -111,104 +159,192 @@ input {
 <header>
     <h1>Barangay Lumangbayan</h1>
     <p>Online Service Portal</p>
+    <div class="account-bar">
+        <span id="signedInAs"></span>
+        <button class="logout" type="button" onclick="logout()">Log Out</button>
+    </div>
 </header>
+
+<p class="prototype-note">School prototype only: resident credentials are stored by the local server; requests, the admin demo account, and sessions are not production-secure.</p>
 
 <main>
 
-    <h2>Available Certificates</h2>
+    <div id="residentDashboard" hidden>
+        <nav class="dashboard-nav" aria-label="Resident dashboard">
+            <button type="button" onclick="showPage('certificatePage')">Certificates</button>
+            <button type="button" onclick="showPage('myRequestsPage')">My Requests</button>
+            <button type="button" onclick="showPage('residentAnnouncementsPage')">Announcements</button>
+        </nav>
 
-    <div class="cards">
+    <section id="certificatePage" class="page">
+        <h2>Available Certificates</h2>
 
-        <div class="card">
-            <h3>Certificate of Indigency</h3>
-            <p>Request a Certificate of Indigency.</p>
-            <button onclick="requestCert('Certificate of Indigency')">
-                Request
-            </button>
+        <div class="cards">
+
+            <div class="card">
+                <h3>Certificate of Indigency</h3>
+                <p>Request a Certificate of Indigency.</p>
+                <button onclick="requestCert('Certificate of Indigency')">Request</button>
+            </div>
+
+            <div class="card">
+                <h3>Barangay Clearance</h3>
+                <p>Request your Barangay Clearance.</p>
+                <button onclick="requestCert('Barangay Clearance')">Request</button>
+            </div>
+
+            <div class="card">
+                <h3>Certificate of Residency</h3>
+                <p>Request proof of residency.</p>
+                <button onclick="requestCert('Certificate of Residency')">Request</button>
+            </div>
+
+            <div class="card">
+                <h3>Certificate of Business Clearance</h3>
+                <p>Request a Business Clearance.</p>
+                <button onclick="requestCert('Certificate of Business Clearance')">Request</button>
+            </div>
         </div>
+    </section>
 
-        <div class="card">
-            <h3>Barangay Clearance</h3>
-            <p>Request your Barangay Clearance.</p>
-            <button onclick="requestCert('Barangay Clearance')">
-                Request
-            </button>
-        </div>
-
-        <div class="card">
-            <h3>Certificate of Residency</h3>
-            <p>Request proof of residency.</p>
-            <button onclick="requestCert('Certificate of Residency')">
-                Request
-            </button>
-        </div>
-
-        <div class="card">
-            <h3>Certificate of Business Clearance</h3>
-            <p>Request a Business Clearance.</p>
-            <button onclick="requestCert('Certificate of Business Clearance')">
-                Request
-            </button>
-        </div>
-
-    </div>
-
-    <section id="requestForm">
+    <section id="requestPage" class="page" hidden>
+        <button class="back-button" type="button" onclick="closeForm()">Back to Certificates</button>
         <h2 id="formTitle">Certificate Request</h2>
 
-        <form onsubmit="submitRequest(event)">
+        <form id="requestForm" onsubmit="submitRequest(event)">
             <label for="fullName">Full Name</label>
-            <input id="fullName" type="text" placeholder="Enter your full name" required>
+            <input id="fullName" type="text" autocomplete="name" placeholder="Enter your full name" required>
+
+            <label for="age">Age</label>
+            <input id="age" type="number" min="1" max="120" placeholder="Enter your age" required>
+
+            <label for="birthDate">Date of Birth</label>
+            <input id="birthDate" type="date" required>
+
+            <label for="sex">Sex</label>
+            <select id="sex" required>
+                <option value="">Select sex</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+            </select>
+
+            <label for="civilStatus">Civil Status</label>
+            <select id="civilStatus" required>
+                <option value="">Select civil status</option>
+                <option value="Single">Single</option>
+                <option value="Married">Married</option>
+                <option value="Widowed">Widowed</option>
+                <option value="Separated">Separated</option>
+            </select>
 
             <label for="address">Complete Address</label>
-            <input id="address" type="text" placeholder="Enter your address" required>
+            <input id="address" type="text" autocomplete="street-address" placeholder="Enter your address" required>
+
+            <label for="contactNumber">Contact Number</label>
+            <input id="contactNumber" type="tel" autocomplete="tel" placeholder="Enter your contact number" required>
 
             <label for="purpose">Purpose of Request</label>
             <input id="purpose" type="text" placeholder="Why do you need this certificate?" required>
 
             <button type="submit">Submit Request</button>
-            <button type="button" onclick="closeForm()">Cancel</button>
+            <button class="back-button" type="button" onclick="showPage('myRequestsPage')">My Requests</button>
         </form>
     </section>
 
-    <section>
+    <section id="myRequestsPage" class="page" hidden>
+        <button class="back-button" type="button" onclick="showPage('certificatePage')">Back to Certificates</button>
         <h2>My Requests</h2>
         <div id="myRequests">
             <p>Wala ka pang request.</p>
         </div>
+        <button class="logout" onclick="logout()">Log Out</button>
     </section>
 
-    <button class="logout" onclick="logout()">Log Out</button>
+    <section id="residentAnnouncementsPage" class="page" hidden>
+        <h2>Announcements</h2>
+        <div id="residentAnnouncements"></div>
+    </section>
+    </div>
+
+    <div id="adminDashboard" hidden>
+        <nav class="dashboard-nav" aria-label="Admin dashboard">
+            <button type="button" onclick="showAdminPage('adminRequestsPage')">Resident Requests</button>
+            <button type="button" onclick="showAdminPage('adminAnnouncementsPage')">Announcements</button>
+        </nav>
+
+        <section id="adminRequestsPage" class="page">
+            <h2>All Resident Requests</h2>
+            <div id="allRequests"></div>
+        </section>
+
+        <section id="adminAnnouncementsPage" class="page" hidden>
+            <h2>Manage Announcements</h2>
+            <form id="announcementForm" onsubmit="saveAnnouncement(event)">
+                <input id="announcementId" type="hidden">
+                <label for="announcementTitle">Title</label>
+                <input id="announcementTitle" type="text" required maxlength="120">
+                <label for="announcementBodyInput">Announcement</label>
+                <textarea id="announcementBodyInput" rows="5" required maxlength="2000"></textarea>
+                <button type="submit">Save Announcement</button>
+                <button class="back-button" type="button" onclick="resetAnnouncementForm()">Clear</button>
+            </form>
+            <div id="adminAnnouncements"></div>
+        </section>
+    </div>
 
 </main>
 
+<script src="scrip.js"></script>
 <script>
 let selectedCertificate = "";
+let currentUser = "";
+let isAdmin = false;
 
 function requestCert(name) {
     selectedCertificate = name;
     document.getElementById("formTitle").textContent = name;
-    document.getElementById("requestForm").style.display = "block";
-    document.getElementById("requestForm").scrollIntoView({
-        behavior: "smooth"
-    });
+    showPage("requestPage");
 }
 
 function closeForm() {
-    document.getElementById("requestForm").style.display = "none";
+    document.getElementById("requestForm").reset();
+    showPage("certificatePage");
+}
+
+function showPage(pageId) {
+    if (!requireResident()) return;
+    document.querySelectorAll("#residentDashboard .page").forEach(page => {
+        page.hidden = page.id !== pageId;
+    });
+}
+
+function showAdminPage(pageId) {
+    if (!requireAdmin()) return;
+    document.querySelectorAll("#adminDashboard .page").forEach(page => {
+        page.hidden = page.id !== pageId;
+    });
 }
 
 function submitRequest(event) {
     event.preventDefault();
 
+    if (!requireResident()) return;
+
     const request = {
         id: Date.now(),
         certificate: selectedCertificate,
         name: document.getElementById("fullName").value.trim(),
+        age: Number(document.getElementById("age").value),
+        birthDate: document.getElementById("birthDate").value,
+        sex: document.getElementById("sex").value,
+        civilStatus: document.getElementById("civilStatus").value,
         address: document.getElementById("address").value.trim(),
+        contactNumber: document.getElementById("contactNumber").value.trim(),
         purpose: document.getElementById("purpose").value.trim(),
         date: new Date().toLocaleDateString(),
-        status: "Pending"
+        status: "Pending",
+        updates: []
     };
 
     if (!request.name || !request.address || !request.purpose) {
@@ -216,25 +352,22 @@ function submitRequest(event) {
         return;
     }
 
-    const user = localStorage.getItem("currentUser") || "Guest";
-    const key = "requests_" + user;
+    const key = "requests_" + currentUser;
     const requests = JSON.parse(localStorage.getItem(key) || "[]");
 
     requests.push(request);
     localStorage.setItem(key, JSON.stringify(requests));
 
-    event.target.reset();
-    closeForm();
+    document.getElementById("requestForm").reset();
     showRequests();
+    showPage("myRequestsPage");
 
     alert("Your certificate request has been submitted!");
 }
 
 function showRequests() {
-    const user = localStorage.getItem("currentUser") || "Guest";
-    const requests = JSON.parse(
-        localStorage.getItem("requests_" + user) || "[]"
-    );
+    if (!requireResident()) return;
+    const requests = JSON.parse(localStorage.getItem("requests_" + currentUser) || "[]");
 
     const container = document.getElementById("myRequests");
     container.innerHTML = "";
@@ -254,6 +387,18 @@ function showRequests() {
         const name = document.createElement("p");
         name.textContent = "Name: " + request.name;
 
+        const details = document.createElement("p");
+        details.textContent = "Age: " + (request.age ?? "Not provided") +
+            " | Date of Birth: " + (request.birthDate || "Not provided") +
+            " | Sex: " + (request.sex || "Not provided") +
+            " | Civil Status: " + (request.civilStatus || "Not provided");
+
+        const address = document.createElement("p");
+        address.textContent = "Address: " + (request.address || "Not provided");
+
+        const contactNumber = document.createElement("p");
+        contactNumber.textContent = "Contact Number: " + (request.contactNumber || "Not provided");
+
         const date = document.createElement("p");
         date.textContent = "Date Requested: " + request.date;
 
@@ -262,18 +407,270 @@ function showRequests() {
 
         const status = document.createElement("p");
         status.className = "request-status";
-        status.textContent = "Status: " + request.status;
+        status.textContent = "Status: " + normalizeRequestStatus(request.status);
 
-        card.append(title, name, date, purpose, status);
+        const updates = document.createElement("div");
+        (Array.isArray(request.updates) ? request.updates : []).forEach(update => {
+            const updateLine = document.createElement("p");
+            updateLine.className = "status-update";
+            updateLine.textContent = "Admin update: " + normalizeRequestStatus(update.status) +
+                (update.date ? " · " + update.date : "");
+            updates.appendChild(updateLine);
+        });
+
+        card.append(title, name, details, address, contactNumber, date, purpose, status, updates);
         container.appendChild(card);
     });
 }
 
+function getResidentRequestEntries() {
+    if (!requireAdmin()) return [];
+    const accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+    const usernames = new Set();
+    const entries = [];
+
+    accounts.forEach(account => {
+        if (!account.username || String(account.email || "").toLowerCase() === "admin@lumangbayan.local" || usernames.has(account.username)) return;
+        usernames.add(account.username);
+
+        const requests = JSON.parse(localStorage.getItem("requests_" + account.username) || "[]");
+        requests.forEach((request, index) => {
+            entries.push({ username: account.username, email: account.email || "", request, index });
+        });
+    });
+
+    return entries.reverse();
+}
+
+function renderAdminRequests() {
+    if (!requireAdmin()) return;
+
+    const container = document.getElementById("allRequests");
+    const entries = getResidentRequestEntries();
+    container.replaceChildren();
+
+    if (entries.length === 0) {
+        container.textContent = "There are no resident requests yet.";
+        return;
+    }
+
+    entries.forEach(entry => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const title = document.createElement("h3");
+        title.textContent = entry.request.certificate || "Certificate request";
+
+        const owner = document.createElement("p");
+        owner.textContent = "Resident account: " + entry.username + (entry.email ? " (" + entry.email + ")" : "");
+
+        const name = document.createElement("p");
+        name.textContent = "Name: " + (entry.request.name || "Not provided");
+
+        const details = document.createElement("p");
+        details.textContent = "Age: " + (entry.request.age ?? "Not provided") +
+            " | Date of Birth: " + (entry.request.birthDate || "Not provided") +
+            " | Sex: " + (entry.request.sex || "Not provided") +
+            " | Civil Status: " + (entry.request.civilStatus || "Not provided");
+
+        const address = document.createElement("p");
+        address.textContent = "Address: " + (entry.request.address || "Not provided");
+
+        const contact = document.createElement("p");
+        contact.textContent = "Contact Number: " + (entry.request.contactNumber || "Not provided");
+
+        const purpose = document.createElement("p");
+        purpose.textContent = "Purpose: " + (entry.request.purpose || "Not provided");
+
+        const statusLabel = document.createElement("label");
+        statusLabel.textContent = "Request status";
+        const status = document.createElement("select");
+        status.className = "status-select";
+        ["Pending", "Ongoing", "Approved", "Rejected", "Completed"].forEach(value => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            status.appendChild(option);
+        });
+        const existingStatus = normalizeRequestStatus(entry.request.status);
+        status.value = existingStatus;
+        status.addEventListener("change", () => updateRequestStatus(entry.username, entry.index, status.value));
+        statusLabel.appendChild(status);
+
+        card.append(title, owner, name, details, address, contact, purpose, statusLabel);
+        container.appendChild(card);
+    });
+}
+
+function updateRequestStatus(username, index, status) {
+    if (!requireAdmin()) return;
+    if (!["Pending", "Ongoing", "Approved", "Rejected", "Completed"].includes(status)) return;
+
+    const key = "requests_" + username;
+    const requests = JSON.parse(localStorage.getItem(key) || "[]");
+    if (!requests[index]) return;
+
+    requests[index].status = status;
+    if (!Array.isArray(requests[index].updates)) requests[index].updates = [];
+    requests[index].updates.push({
+        status,
+        date: new Date().toLocaleString(),
+        by: "Admin"
+    });
+    localStorage.setItem(key, JSON.stringify(requests));
+}
+
+function normalizeRequestStatus(status) {
+    if (status === "Processing") return "Ongoing";
+    return ["Pending", "Ongoing", "Approved", "Rejected", "Completed"].includes(status)
+        ? status
+        : "Pending";
+}
+
+function getAnnouncements() {
+    return JSON.parse(localStorage.getItem("announcements") || "[]");
+}
+
+function renderAnnouncements(containerId, canManage) {
+    if (canManage && !requireAdmin()) return;
+    const container = document.getElementById(containerId);
+    const announcements = getAnnouncements().slice().reverse();
+    container.replaceChildren();
+
+    if (announcements.length === 0) {
+        container.textContent = "There are no announcements yet.";
+        return;
+    }
+
+    announcements.forEach(announcement => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const title = document.createElement("h3");
+        title.textContent = announcement.title;
+        const body = document.createElement("p");
+        body.className = "announcement-body";
+        body.textContent = announcement.body;
+        const date = document.createElement("p");
+        date.textContent = "Posted: " + (announcement.date || "");
+        card.append(title, body, date);
+
+        if (canManage && isAdmin) {
+            const edit = document.createElement("button");
+            edit.type = "button";
+            edit.textContent = "Edit";
+            edit.addEventListener("click", () => editAnnouncement(announcement.id));
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "logout";
+            remove.textContent = "Delete";
+            remove.addEventListener("click", () => deleteAnnouncement(announcement.id));
+            card.append(edit, remove);
+        }
+
+        container.appendChild(card);
+    });
+}
+
+function saveAnnouncement(event) {
+    event.preventDefault();
+    if (!requireAdmin()) return;
+
+    const id = document.getElementById("announcementId").value;
+    const title = document.getElementById("announcementTitle").value.trim();
+    const body = document.getElementById("announcementBodyInput").value.trim();
+    if (!title || !body) return;
+
+    const announcements = getAnnouncements();
+    const existing = announcements.find(announcement => String(announcement.id) === id);
+    if (existing) {
+        existing.title = title;
+        existing.body = body;
+        existing.date = new Date().toLocaleDateString();
+    } else {
+        announcements.push({ id: Date.now(), title, body, date: new Date().toLocaleDateString() });
+    }
+
+    localStorage.setItem("announcements", JSON.stringify(announcements));
+    resetAnnouncementForm();
+    renderAnnouncements("adminAnnouncements", true);
+    renderAnnouncements("residentAnnouncements", false);
+}
+
+function editAnnouncement(id) {
+    if (!requireAdmin()) return;
+    const announcement = getAnnouncements().find(item => String(item.id) === String(id));
+    if (!announcement) return;
+
+    document.getElementById("announcementId").value = announcement.id;
+    document.getElementById("announcementTitle").value = announcement.title;
+    document.getElementById("announcementBodyInput").value = announcement.body;
+    showAdminPage("adminAnnouncementsPage");
+}
+
+function deleteAnnouncement(id) {
+    if (!requireAdmin() || !confirm("Delete this announcement?")) return;
+    const announcements = getAnnouncements().filter(item => String(item.id) !== String(id));
+    localStorage.setItem("announcements", JSON.stringify(announcements));
+    renderAnnouncements("adminAnnouncements", true);
+    renderAnnouncements("residentAnnouncements", false);
+}
+
+function resetAnnouncementForm() {
+    const form = document.getElementById("announcementForm");
+    if (form) form.reset();
+    const id = document.getElementById("announcementId");
+    if (id) id.value = "";
+}
+
 function logout() {
+    sessionStorage.removeItem("authSession");
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("currentEmail");
+    localStorage.removeItem("currentRole");
     window.location.href = "index.html";
 }
 
-showRequests();
+function requireAdmin() {
+    if (isAdminSession()) return true;
+    logout();
+    return false;
+}
+
+function requireResident() {
+    const session = getResidentSession();
+    if (session && (!currentUser || session.username === currentUser) && !isAdmin) return true;
+    logout();
+    return false;
+}
+
+function initializeDashboard() {
+    isAdmin = isAdminSession();
+    const resident = isAdmin ? null : getResidentSession();
+    if (!isAdmin && !resident) {
+        logout();
+        return;
+    }
+    currentUser = isAdmin ? "Administrator" : resident.username;
+    document.getElementById("signedInAs").textContent =
+        (isAdmin ? "Admin" : "Resident") + ": " + currentUser;
+    document.getElementById("residentDashboard").hidden = isAdmin;
+    document.getElementById("adminDashboard").hidden = !isAdmin;
+
+    if (isAdmin) {
+        renderAdminRequests();
+        renderAnnouncements("adminAnnouncements", true);
+    } else {
+        showRequests();
+        renderAnnouncements("residentAnnouncements", false);
+    }
+}
+
+initializeDashboard();
+
+window.addEventListener("storage", event => {
+    if (!isAdmin && event.key === "requests_" + currentUser) showRequests();
+});
 </script>
 
 </body>

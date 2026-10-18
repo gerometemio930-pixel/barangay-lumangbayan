@@ -1,326 +1,227 @@
-/* =================================
-   SHOW LOGIN
-================================= */
+
+function updateLiveClock() {
+    const clock = document.getElementById("liveClock");
+
+    if (!clock) return;
+
+    const now = new Date();
+    const timeFormatter = new Intl.DateTimeFormat("en-PH", {
+        timeZone: "Asia/Manila",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
+    const dateFormatter = new Intl.DateTimeFormat("en-PH", {
+        timeZone: "Asia/Manila",
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+    });
+
+    clock.textContent = `${dateFormatter.format(now)} · ${timeFormatter.format(now)} PHT`;
+    clock.dateTime = now.toISOString();
+}
+
+updateLiveClock();
+window.setInterval(updateLiveClock, 1000);
 
 function showLogin() {
-
     document.getElementById("welcomePage").style.display = "none";
-
     document.getElementById("registerPage").style.display = "none";
-
+    document.getElementById("forgotPasswordPage").style.display = "none";
+    document.getElementById("resetPasswordPage").style.display = "none";
     document.getElementById("loginPage").style.display = "flex";
-
 }
-
-
-/* =================================
-   SHOW REGISTER
-================================= */
 
 function showRegister(event) {
-
     event.preventDefault();
-
     document.getElementById("welcomePage").style.display = "none";
-
     document.getElementById("loginPage").style.display = "none";
-
+    document.getElementById("forgotPasswordPage").style.display = "none";
+    document.getElementById("resetPasswordPage").style.display = "none";
     document.getElementById("registerPage").style.display = "flex";
-
 }
-
-
-/* =================================
-   BACK TO LOGIN
-================================= */
 
 function backToLogin(event) {
-
     event.preventDefault();
-
-    document.getElementById("registerPage").style.display = "none";
-
-    document.getElementById("welcomePage").style.display = "none";
-
-    document.getElementById("loginPage").style.display = "flex";
-
+    showLogin();
 }
 
+function togglePassword(id, button) {
+    const field = document.getElementById(id);
 
-/* =================================
-   REGISTER ACCOUNT
-================================= */
-
-function registerAccount(event) {
-
-    event.preventDefault();
-
-
-    const username =
-        document.getElementById("registerUsername").value.trim();
-
-    const email =
-        document.getElementById("registerEmail").value.trim().toLowerCase();
-
-    const password =
-        document.getElementById("registerPassword").value;
-
-    const message =
-        document.getElementById("registerMessage");
-
-
-    /* CHECK IF ACCOUNT ALREADY EXISTS */
-
-    const existingAccount =
-        localStorage.getItem("barangayAccount");
-
-
-    if (existingAccount) {
-
-        const account =
-            JSON.parse(existingAccount);
-
-
-        if (account.email === email) {
-
-            message.innerHTML =
-                "This email is already registered.";
-
-            message.style.color = "#d32f2f";
-
-            return;
-        }
-
+    if (field.type === "password") {
+        field.type = "text";
+        button.textContent = "🙈";
+    } else {
+        field.type = "password";
+        button.textContent = "👁";
     }
-
-
-    /* CREATE ACCOUNT */
-
-    const newAccount = {
-
-        username: username,
-
-        email: email,
-
-        password: password
-
-    };
-
-
-    /* SAVE ACCOUNT */
-
-    localStorage.setItem(
-        "barangayAccount",
-        JSON.stringify(newAccount)
-    );
-
-
-    /* SUCCESS MESSAGE */
-
-    message.innerHTML =
-        "✓ Account created successfully!";
-
-    message.style.color = "#21a765";
-
-
-    /* CLEAR FORM */
-
-    document.getElementById("registerUsername").value = "";
-
-    document.getElementById("registerEmail").value = "";
-
-    document.getElementById("registerPassword").value = "";
-
-    document.getElementById("terms").checked = false;
-
-
-    /* GO TO LOGIN AFTER 1 SECOND */
-
-    setTimeout(function() {
-
-        document.getElementById("registerPage").style.display = "none";
-
-        document.getElementById("loginPage").style.display = "flex";
-
-
-        document.getElementById("loginMessage").innerHTML =
-            "Account created. You can now sign in.";
-
-        document.getElementById("loginMessage").style.color =
-            "#21a765";
-
-
-    }, 1000);
-
 }
 
+async function apiRequest(path, body) {
+    const response = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || "The request could not be completed.");
+    return result;
+}
 
-/* =================================
-   LOGIN
-================================= */
-
-function login(event) {
-
+async function registerAccount(event) {
     event.preventDefault();
 
+    const username = document.getElementById("registerUsername").value.trim();
+    const role = document.getElementById("registerRole").value;
+    const email = document.getElementById("registerEmail").value.trim().toLowerCase();
+    const password = document.getElementById("registerPassword").value;
 
-    const email =
-        document.getElementById("email").value.trim().toLowerCase();
-
-    const password =
-        document.getElementById("password").value;
-
-    const rememberMe =
-        document.getElementById("rememberMe").checked;
-
-    const message =
-        document.getElementById("loginMessage");
-
-
-    /* GET REGISTERED ACCOUNT */
-
-    const savedAccount =
-        localStorage.getItem("barangayAccount");
-
-
-    /* NO ACCOUNT YET */
-
-    if (!savedAccount) {
-
-        message.innerHTML =
-            "No account found. Please sign up first.";
-
-        message.style.color = "#d32f2f";
-
+    if (password.length < 8) {
+        document.getElementById("registerMessage").textContent =
+            "Password must be at least 8 characters.";
         return;
     }
 
-
-    /* CONVERT SAVED ACCOUNT */
-
-    const account =
-        JSON.parse(savedAccount);
-
-
-    /* CHECK EMAIL AND PASSWORD */
-
-    if (
-        email === account.email &&
-        password === account.password
-    ) {
-
-        message.innerHTML =
-            "✓ Sign in successful! Welcome, " +
-            account.username + ".";
-
-        message.style.color = "#21a765";
-
-
-        /* REMEMBER ME */
-
-        if (rememberMe) {
-
-            localStorage.setItem(
-                "rememberedEmail",
-                email
-            );
-
-        } else {
-
-            localStorage.removeItem(
-                "rememberedEmail"
-            );
-
-        }
-
-
-        /*
-           DITO NATIN ILALAGAY ANG DASHBOARD
-           SA NEXT PART NG PROJECT
-        */
-
-    } else {
-
-        message.innerHTML =
-            "Invalid email or password.";
-
-        message.style.color = "#d32f2f";
-
+    const message = document.getElementById("registerMessage");
+    try {
+        await apiRequest("/api/register", { username, email, password, role });
+        const accounts = JSON.parse(localStorage.getItem("accounts") || "[]")
+            .filter(user => String(user.email || "").toLowerCase() !== email);
+        accounts.push({ username, email, role });
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+        message.textContent = "Account created! You can now log in.";
+        event.target.reset();
+    } catch (error) {
+        message.textContent = error.message;
     }
-
 }
 
+async function login(event) {
+    event.preventDefault();
 
-/* =================================
-   FORGOT PASSWORD
-================================= */
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const password = document.getElementById("password").value;
+
+    try {
+        let user;
+        try {
+            user = await apiRequest("/api/login", { email, password });
+        } catch (error) {
+            const legacyAccounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+            const legacyAccount = legacyAccounts.find(account =>
+                String(account.email || "").toLowerCase() === email && account.password === password
+            );
+            if (!legacyAccount) throw error;
+
+            try {
+                await apiRequest("/api/register", {
+                    username: legacyAccount.username,
+                    email,
+                    password
+                });
+            } catch {
+                // An existing backend account will be checked by the login request below.
+            }
+            user = await apiRequest("/api/login", { email, password });
+        }
+        sessionStorage.setItem("authSession", JSON.stringify({
+            type: user.role,
+            username: user.username,
+            email: user.email
+        }));
+        const accounts = JSON.parse(localStorage.getItem("accounts") || "[]")
+            .filter(account => String(account.email || "").toLowerCase() !== user.email);
+        accounts.push({ username: user.username, email: user.email, role: user.role });
+        localStorage.setItem("accounts", JSON.stringify(accounts));
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("currentEmail");
+        localStorage.removeItem("currentRole");
+        window.location.href = "dashboard.html";
+    } catch {
+        document.getElementById("loginMessage").textContent =
+            "Invalid email or password.";
+    }
+}
+
+function getResidentSession() {
+    let session;
+    try {
+        session = JSON.parse(sessionStorage.getItem("authSession") || "null");
+    } catch {
+        return null;
+    }
+    if (!session || session.type !== "resident") return null;
+
+    return session.username && session.email
+        ? { username: session.username, email: session.email }
+        : null;
+}
+
+function isAdminSession() {
+    let session;
+    try {
+        session = JSON.parse(sessionStorage.getItem("authSession") || "null");
+    } catch {
+        return false;
+    }
+    return Boolean(session && session.type === "admin" && session.email);
+}
 
 function forgotPassword(event) {
-
     event.preventDefault();
+    document.getElementById("welcomePage").style.display = "none";
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("registerPage").style.display = "none";
+    document.getElementById("resetPasswordPage").style.display = "none";
+    document.getElementById("resetEmail").value = document.getElementById("email").value.trim();
+    document.getElementById("forgotPasswordPage").style.display = "flex";
+}
 
+async function sendPasswordReset(event) {
+    event.preventDefault();
+    const message = document.getElementById("resetRequestMessage");
+    message.textContent = "Sending reset link...";
+    try {
+        const email = document.getElementById("resetEmail").value.trim().toLowerCase();
+        const result = await apiRequest("/api/forgot-password", { email });
+        message.textContent = result.message;
+    } catch (error) {
+        message.textContent = error.message;
+    }
+}
 
-    const savedAccount =
-        localStorage.getItem("barangayAccount");
-
-
-    if (!savedAccount) {
-
-        alert(
-            "No account found. Please register first."
-        );
-
+async function resetPassword(event) {
+    event.preventDefault();
+    const message = document.getElementById("resetPasswordMessage");
+    const password = document.getElementById("newPassword").value;
+    const confirmation = document.getElementById("confirmPassword").value;
+    if (password !== confirmation) {
+        message.textContent = "The passwords do not match.";
         return;
     }
 
-
-    const account =
-        JSON.parse(savedAccount);
-
-
-    alert(
-        "Your registered email is: " +
-        account.email
-    );
-
+    try {
+        await apiRequest("/api/reset-password", {
+            token: new URLSearchParams(window.location.search).get("resetToken"),
+            password
+        });
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showLogin();
+        document.getElementById("loginMessage").textContent = "Password updated. You can now sign in.";
+    } catch (error) {
+        message.textContent = error.message;
+    }
 }
 
-
-/* =================================
-   REMEMBERED EMAIL
-================================= */
-
-window.onload = function() {
-
-    const rememberedEmail =
-        localStorage.getItem("rememberedEmail");
-
-
-    if (rememberedEmail) {
-
-        const emailInput =
-            document.getElementById("email");
-
-
-        if (emailInput) {
-
-            emailInput.value =
-                rememberedEmail;
-
-        }
-
-
-        const rememberCheckbox =
-            document.getElementById("rememberMe");
-
-
-        if (rememberCheckbox) {
-
-            rememberCheckbox.checked =
-                true;
-
-        }
-
-    }
-
-};
+const passwordResetToken = new URLSearchParams(window.location.search).get("resetToken");
+if (passwordResetToken) {
+    document.getElementById("welcomePage").style.display = "none";
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("registerPage").style.display = "none";
+    document.getElementById("forgotPasswordPage").style.display = "none";
+    document.getElementById("resetPasswordPage").style.display = "flex";
+}
