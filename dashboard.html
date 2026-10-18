@@ -430,7 +430,9 @@ function getResidentRequestEntries() {
     const entries = [];
 
     accounts.forEach(account => {
-        if (!account.username || String(account.email || "").toLowerCase() === "admin@lumangbayan.local" || usernames.has(account.username)) return;
+        if (!account.username || account.role === "admin" ||
+            String(account.email || "").toLowerCase() === "admin@lumangbayan.local" ||
+            usernames.has(account.username)) return;
         usernames.add(account.username);
 
         const requests = JSON.parse(localStorage.getItem("requests_" + account.username) || "[]");

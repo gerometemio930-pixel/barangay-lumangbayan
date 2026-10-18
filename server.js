@@ -83,10 +83,12 @@ app.post("/api/register", async (request, response, next) => {
         }
 
         const store = await readStore();
-        if (store.accounts.some(account => account.email === email)) {
+        if (store.accounts.some(account => account?.email === email)) {
             return response.status(409).json({ error: "Email already registered." });
         }
-        if (store.accounts.some(account => account.username.toLowerCase() === username.toLowerCase())) {
+        if (store.accounts.some(account =>
+            String(account?.username || "").toLowerCase() === username.toLowerCase()
+        )) {
             return response.status(409).json({ error: "Username already taken." });
         }
 
@@ -200,10 +202,18 @@ app.use((request, response, next) => {
 });
 app.use(express.static(root, { dotfiles: "deny" }));
 app.use((error, request, response, next) => {
-    console.error(error.message);
-    response.status(500).json({ error: error.message.includes("not configured")
+    console.error(error);
+    const statusCode = Number.isInteger(error.statusCode) && error.statusCode >= 400 && error.statusCode < 500
+        ? error.statusCode
+        : 500;
+    const genericMessage = error.message.includes("not configured")
         ? error.message
-        : "The server could not complete the request. Please try again later." });
+        : "The server could not complete the request. Please try again later.";
+    response.status(statusCode).json({
+        error: process.env.NODE_ENV === "production" && statusCode === 500
+            ? genericMessage
+            : error.message
+    });
 });
 
 app.listen(port, () => console.log(`Barangay portal listening on http://localhost:${port}`));

@@ -141,9 +141,9 @@ async function login(event) {
         localStorage.removeItem("currentEmail");
         localStorage.removeItem("currentRole");
         window.location.href = "dashboard.html";
-    } catch {
+    } catch (error) {
         document.getElementById("loginMessage").textContent =
-            "Invalid email or password.";
+            error.message || "Unable to sign in. Please try again.";
     }
 }
 
