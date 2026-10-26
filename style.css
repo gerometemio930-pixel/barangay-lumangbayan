@@ -1,0 +1,261 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #243047;
+    background: #f2f5fb;
+}
+
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #dce8ff, #f5f7ff);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 32px;
+    border-radius: 18px;
+    background: white;
+    box-shadow: 0 8px 30px #17255418;
+}
+
+.logo {
+    font-size: 45px;
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #234c9b;
+}
+
+.subtitle {
+    text-align: center;
+    color: #718096;
+    margin-bottom: 28px;
+}
+
+label {
+    display: block;
+    margin: 15px 0 7px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccd5e4;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+}
+
+input:focus {
+    border-color: #3267c8;
+    box-shadow: 0 0 0 3px #3267c81a;
+}
+
+.password-wrapper {
+    display: flex;
+    position: relative;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 48px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 19px;
+}
+
+.main-button {
+    width: 100%;
+    margin-top: 22px;
+    padding: 13px;
+    border: none;
+    border-radius: 8px;
+    background: #285bb5;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.main-button:hover {
+    background: #19458f;
+}
+
+.switch-page {
+    text-align: center;
+    margin-top: 22px;
+    font-size: 14px;
+}
+
+a {
+    color: #285bb5;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.message {
+    font-size: 14px;
+    text-align: center;
+    color: #d22;
+}
+
+.dashboard-page {
+    min-height: 100vh;
+}
+
+.topbar {
+    background: #234c9b;
+    color: white;
+    padding: 18px 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.brand-logo {
+    font-size: 28px;
+}
+
+.logout-button {
+    background: white;
+    color: #234c9b;
+    border: none;
+    padding: 10px 17px;
+    border-radius: 7px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.dashboard-container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 35px auto;
+}
+
+.welcome {
+    padding: 25px;
+    border-radius: 14px;
+    background: white;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 15px #1725540c;
+}
+
+.welcome h1 {
+    text-align: left;
+    margin-top: 0;
+}
+
+.welcome p {
+    color: #667085;
+}
+
+.search-input {
+    margin-bottom: 25px;
+    background: white;
+}
+
+.announcement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.announcement-card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px;
+    border-top: 5px solid #3267c8;
+    box-shadow: 0 4px 15px #1725540c;
+}
+
+.announcement-card h2 {
+    font-size: 19px;
+    color: #234c9b;
+}
+
+.announcement-card p {
+    line-height: 1.6;
+    color: #596579;
+}
+
+.announcement-date {
+    font-size: 13px;
+    color: #7a8495;
+}
+
+.category {
+    display: inline-block;
+    background: #e7efff;
+    color: #234c9b;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.empty-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+}
+
+footer {
+    text-align: center;
+    color: #7a8495;
+    padding: 20px;
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 24px 18px;
+    }
+
+    .brand {
+        font-size: 14px;
+    }
+
+    .dashboard-container {
+        width: 92%;
+    }
+}
