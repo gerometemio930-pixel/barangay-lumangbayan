@@ -48,10 +48,11 @@ h2 {
 .card {
     background: white;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px #0001;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     margin-bottom: 12px;
     overflow-wrap: anywhere;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card h3 {
@@ -142,9 +143,118 @@ textarea {
     max-width: 220px;
 }
 
+.admin-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px #0001;
+    padding: 15px 18px;
+    border-left: 4px solid #176b3a;
+}
+
+.summary-card h3 {
+    margin: 0 0 6px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #4d5a52;
+}
+
+.summary-card p {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: #176b3a;
+}
+
+.summary-card:hover,
+.card:hover,
+.profile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(23, 107, 58, 0.12);
+}
+
+.admin-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 14px 0 18px;
+}
+
+.admin-controls input,
+.admin-controls select {
+    min-width: 180px;
+    flex: 1;
+}
+
+.requirements-box {
+    background: #f3f8f4;
+    border: 1px solid #dfece2;
+    border-left: 4px solid #176b3a;
+    padding: 14px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.requirements-box h3 {
+    margin: 0 0 10px;
+    color: #176b3a;
+    font-size: 18px;
+}
+
+.requirements-box ul {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.6;
+}
+
 .announcement-body {
     white-space: pre-wrap;
 }
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 2px 6px #0001;
+}
+
+.profile-card p {
+    margin: 8px 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #0d3d1e;
+    background: #dfeee2;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.status-badge[data-status="Pending"] { background: #fff3c4; color: #7a5c00; }
+.status-badge[data-status="Ongoing"] { background: #dfe9ff; color: #1d4ec8; }
+.status-badge[data-status="Approved"] { background: #dff7e7; color: #176b3a; }
+.status-badge[data-status="Rejected"] { background: #ffe0e0; color: #a52828; }
+.status-badge[data-status="Completed"] { background: #e7f3ff; color: #0f5f8c; }
 
 @media (max-width: 500px) {
     main {
@@ -165,8 +275,6 @@ textarea {
     </div>
 </header>
 
-<p class="prototype-note">School prototype only: resident credentials are stored by the local server; requests, the admin demo account, and sessions are not production-secure.</p>
-
 <main>
 
     <div id="residentDashboard" hidden>
@@ -174,35 +282,60 @@ textarea {
             <button type="button" onclick="showPage('certificatePage')">Certificates</button>
             <button type="button" onclick="showPage('myRequestsPage')">My Requests</button>
             <button type="button" onclick="showPage('residentAnnouncementsPage')">Announcements</button>
+            <button type="button" onclick="showPage('residentProfilePage')">Profile</button>
         </nav>
 
     <section id="certificatePage" class="page">
-        <h2>Available Certificates</h2>
+        <h2>Barangay Service Requests</h2>
 
         <div class="cards">
 
             <div class="card">
                 <h3>Certificate of Indigency</h3>
-                <p>Request a Certificate of Indigency.</p>
-                <button onclick="requestCert('Certificate of Indigency')">Request</button>
+                <p>For those needing proof of financial status or support assistance.</p>
+                <button onclick="requestCert('Certificate of Indigency', ['Filled application form', 'Barangay ID or valid government-issued ID', 'Latest proof of residency or household certification', 'Purpose of request and supporting documents, if any'])">Request</button>
             </div>
 
             <div class="card">
                 <h3>Barangay Clearance</h3>
-                <p>Request your Barangay Clearance.</p>
-                <button onclick="requestCert('Barangay Clearance')">Request</button>
+                <p>For employment, travel, and local records.</p>
+                <button onclick="requestCert('Barangay Clearance', ['Filled application form', 'Barangay ID or valid ID', 'Proof of residency', 'Community Tax Certificate (Cedula), if required'])">Request</button>
             </div>
 
             <div class="card">
                 <h3>Certificate of Residency</h3>
-                <p>Request proof of residency.</p>
-                <button onclick="requestCert('Certificate of Residency')">Request</button>
+                <p>To prove a resident lives in the barangay.</p>
+                <button onclick="requestCert('Certificate of Residency', ['Filled application form', 'Barangay ID or valid ID', 'Proof of residence such as utility bill or lease agreement', 'Purpose of request'])">Request</button>
             </div>
 
             <div class="card">
                 <h3>Certificate of Business Clearance</h3>
-                <p>Request a Business Clearance.</p>
-                <button onclick="requestCert('Certificate of Business Clearance')">Request</button>
+                <p>For business permit, licensing, or compliance purposes.</p>
+                <button onclick="requestCert('Certificate of Business Clearance', ['Filled business clearance application', 'Business permit or business registration papers', 'Valid government-issued ID', 'Proof of business address and ownership'])">Request</button>
+            </div>
+
+            <div class="card">
+                <h3>Barangay ID / Resident ID</h3>
+                <p>For valid resident identification and local verification.</p>
+                <button onclick="requestCert('Barangay ID / Resident ID', ['Two valid IDs or supporting identity documents', 'Birth certificate or equivalent record', 'Proof of residence', 'Filled application form'])">Request</button>
+            </div>
+
+            <div class="card">
+                <h3>Community Tax Certificate (Cedula)</h3>
+                <p>For tax documentation and identification requirements.</p>
+                <button onclick="requestCert('Community Tax Certificate (Cedula)', ['Filled cedula application', 'Valid ID', 'Proof of income or employment details, if required', 'Taxpayer information and residence details'])">Request</button>
+            </div>
+
+            <div class="card">
+                <h3>Senior Citizen / PWD Assistance Request</h3>
+                <p>For local assistance and support documentation.</p>
+                <button onclick="requestCert('Senior Citizen / PWD Assistance Request', ['Filled assistance application', 'Valid ID and senior citizen / PWD ID, if available', 'Medical or supporting certification, if applicable', 'Proof of residency'])">Request</button>
+            </div>
+
+            <div class="card">
+                <h3>Barangay Referral / Case Request</h3>
+                <p>For local referrals, endorsements, and document support.</p>
+                <button onclick="requestCert('Barangay Referral / Case Request', ['Filled referral form', 'Relevant supporting documents', 'Valid ID', 'Reason and purpose of request'])">Request</button>
             </div>
         </div>
     </section>
@@ -210,6 +343,11 @@ textarea {
     <section id="requestPage" class="page" hidden>
         <button class="back-button" type="button" onclick="closeForm()">Back to Certificates</button>
         <h2 id="formTitle">Certificate Request</h2>
+
+        <div id="requirementsBox" class="requirements-box" aria-live="polite">
+            <h3>Required Documents</h3>
+            <ul id="requirementsList"></ul>
+        </div>
 
         <form id="requestForm" onsubmit="submitRequest(event)">
             <label for="fullName">Full Name</label>
@@ -265,6 +403,11 @@ textarea {
         <h2>Announcements</h2>
         <div id="residentAnnouncements"></div>
     </section>
+
+    <section id="residentProfilePage" class="page" hidden>
+        <h2>My Profile</h2>
+        <div id="residentProfile" class="profile-grid"></div>
+    </section>
     </div>
 
     <div id="adminDashboard" hidden>
@@ -275,6 +418,21 @@ textarea {
 
         <section id="adminRequestsPage" class="page">
             <h2>All Resident Requests</h2>
+
+            <div id="adminSummary" class="admin-summary" aria-live="polite"></div>
+
+            <div class="admin-controls">
+                <input id="adminSearch" type="search" placeholder="Search resident or service" aria-label="Search requests">
+                <select id="adminStatusFilter" aria-label="Filter by status">
+                    <option value="all">All statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Ongoing">Ongoing</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+
             <div id="allRequests"></div>
         </section>
 
@@ -298,12 +456,21 @@ textarea {
 <script src="scrip.js"></script>
 <script>
 let selectedCertificate = "";
+let selectedRequirements = [];
 let currentUser = "";
 let isAdmin = false;
 
-function requestCert(name) {
+function requestCert(name, requirements = []) {
     selectedCertificate = name;
+    selectedRequirements = Array.isArray(requirements) && requirements.length ? requirements : ["Filled application form", "Valid ID", "Proof of residency"];
     document.getElementById("formTitle").textContent = name;
+    const list = document.getElementById("requirementsList");
+    list.replaceChildren();
+    selectedRequirements.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        list.appendChild(li);
+    });
     showPage("requestPage");
 }
 
@@ -316,6 +483,41 @@ function showPage(pageId) {
     if (!requireResident()) return;
     document.querySelectorAll("#residentDashboard .page").forEach(page => {
         page.hidden = page.id !== pageId;
+    });
+}
+
+function renderResidentProfile() {
+    if (!requireResident()) return;
+    const profile = document.getElementById("residentProfile");
+    if (!profile) return;
+
+    const session = JSON.parse(sessionStorage.getItem("authSession") || "null");
+    const accounts = JSON.parse(localStorage.getItem("accounts") || "[]");
+    const account = accounts.find(item =>
+        String(item.email || "").toLowerCase() === String(session?.email || "").toLowerCase()
+    ) || {
+        username: session?.username || "Resident",
+        email: session?.email || "Not available",
+        role: session?.type || "resident"
+    };
+
+    profile.replaceChildren();
+    const data = [
+        ["Username", account.username || "Not available"],
+        ["Email", account.email || "Not available"],
+        ["Account Type", account.role === "admin" ? "Admin" : "Resident"],
+        ["Status", "Active"]
+    ];
+
+    data.forEach(([label, value]) => {
+        const card = document.createElement("div");
+        card.className = "profile-card";
+        const labelEl = document.createElement("p");
+        labelEl.textContent = label + ":";
+        const valueEl = document.createElement("p");
+        valueEl.textContent = value;
+        card.append(labelEl, valueEl);
+        profile.appendChild(card);
     });
 }
 
@@ -334,6 +536,7 @@ function submitRequest(event) {
     const request = {
         id: Date.now(),
         certificate: selectedCertificate,
+        requirements: selectedRequirements,
         name: document.getElementById("fullName").value.trim(),
         age: Number(document.getElementById("age").value),
         birthDate: document.getElementById("birthDate").value,
@@ -405,9 +608,20 @@ function showRequests() {
         const purpose = document.createElement("p");
         purpose.textContent = "Purpose: " + request.purpose;
 
+        const requirementList = document.createElement("p");
+        const requirementText = Array.isArray(request.requirements) && request.requirements.length
+            ? "Requirements: " + request.requirements.join("; ")
+            : "Requirements: Filled application form; Valid ID; Proof of residency";
+        requirementList.textContent = requirementText;
+
         const status = document.createElement("p");
         status.className = "request-status";
-        status.textContent = "Status: " + normalizeRequestStatus(request.status);
+        const badge = document.createElement("span");
+        badge.className = "status-badge";
+        const normalized = normalizeRequestStatus(request.status);
+        badge.dataset.status = normalized;
+        badge.textContent = normalized;
+        status.append("Status: ", badge);
 
         const updates = document.createElement("div");
         (Array.isArray(request.updates) ? request.updates : []).forEach(update => {
@@ -418,7 +632,7 @@ function showRequests() {
             updates.appendChild(updateLine);
         });
 
-        card.append(title, name, details, address, contactNumber, date, purpose, status, updates);
+        card.append(title, name, details, address, contactNumber, date, purpose, requirementList, status, updates);
         container.appendChild(card);
     });
 }
@@ -432,6 +646,7 @@ function getResidentRequestEntries() {
     accounts.forEach(account => {
         if (!account.username || account.role === "admin" ||
             String(account.email || "").toLowerCase() === "admin@lumangbayan.local" ||
+            String(account.email || "").toLowerCase() === "admin@barangay.local" ||
             usernames.has(account.username)) return;
         usernames.add(account.username);
 
@@ -444,15 +659,67 @@ function getResidentRequestEntries() {
     return entries.reverse();
 }
 
+function renderAdminSummary(entries) {
+    const summary = document.getElementById("adminSummary");
+    if (!summary) return;
+
+    const statuses = ["Pending", "Ongoing", "Approved", "Rejected", "Completed"];
+    const counts = Object.fromEntries(statuses.map(status => [status, 0]));
+    counts.Total = entries.length;
+
+    entries.forEach(entry => {
+        const status = normalizeRequestStatus(entry.request.status);
+        if (counts[status] !== undefined) counts[status] += 1;
+    });
+
+    summary.replaceChildren();
+    statuses.concat("Total").forEach(label => {
+        const card = document.createElement("div");
+        card.className = "summary-card";
+        const heading = document.createElement("h3");
+        heading.textContent = label === "Total" ? "Total Requests" : label;
+        const count = document.createElement("p");
+        count.textContent = String(counts[label] ?? 0);
+        card.append(heading, count);
+        summary.appendChild(card);
+    });
+}
+
+function getFilteredAdminEntries() {
+    const entries = getResidentRequestEntries();
+    const searchInput = document.getElementById("adminSearch");
+    const statusFilter = document.getElementById("adminStatusFilter");
+    const searchTerm = (searchInput ? searchInput.value : "").trim().toLowerCase();
+    const selectedStatus = statusFilter ? statusFilter.value : "all";
+
+    return entries.filter(entry => {
+        const request = entry.request || {};
+        const matchesStatus = selectedStatus === "all" || normalizeRequestStatus(request.status) === selectedStatus;
+        const searchText = [
+            entry.username,
+            entry.email,
+            request.certificate,
+            request.name,
+            request.purpose,
+            request.address,
+            request.contactNumber,
+            Array.isArray(request.requirements) ? request.requirements.join(" ") : ""
+        ].join(" ").toLowerCase();
+        const matchesSearch = !searchTerm || searchText.includes(searchTerm);
+        return matchesStatus && matchesSearch;
+    });
+}
+
 function renderAdminRequests() {
     if (!requireAdmin()) return;
 
     const container = document.getElementById("allRequests");
-    const entries = getResidentRequestEntries();
+    const entries = getFilteredAdminEntries();
+    renderAdminSummary(getResidentRequestEntries());
     container.replaceChildren();
 
     if (entries.length === 0) {
-        container.textContent = "There are no resident requests yet.";
+        container.textContent = "There are no resident requests yet for this filter.";
         return;
     }
 
@@ -484,6 +751,12 @@ function renderAdminRequests() {
         const purpose = document.createElement("p");
         purpose.textContent = "Purpose: " + (entry.request.purpose || "Not provided");
 
+        const requirements = document.createElement("p");
+        const requirementText = Array.isArray(entry.request.requirements) && entry.request.requirements.length
+            ? entry.request.requirements.join("; ")
+            : "Filled application form; Valid ID; Proof of residency";
+        requirements.textContent = "Requirements: " + requirementText;
+
         const statusLabel = document.createElement("label");
         statusLabel.textContent = "Request status";
         const status = document.createElement("select");
@@ -499,7 +772,7 @@ function renderAdminRequests() {
         status.addEventListener("change", () => updateRequestStatus(entry.username, entry.index, status.value));
         statusLabel.appendChild(status);
 
-        card.append(title, owner, name, details, address, contact, purpose, statusLabel);
+        card.append(title, owner, name, details, address, contact, purpose, requirements, statusLabel);
         container.appendChild(card);
     });
 }
@@ -520,6 +793,7 @@ function updateRequestStatus(username, index, status) {
         by: "Admin"
     });
     localStorage.setItem(key, JSON.stringify(requests));
+    renderAdminRequests();
 }
 
 function normalizeRequestStatus(status) {
@@ -660,9 +934,18 @@ function initializeDashboard() {
     document.getElementById("adminDashboard").hidden = !isAdmin;
 
     if (isAdmin) {
+        const searchInput = document.getElementById("adminSearch");
+        const statusFilter = document.getElementById("adminStatusFilter");
+        if (searchInput) {
+            searchInput.addEventListener("input", renderAdminRequests);
+        }
+        if (statusFilter) {
+            statusFilter.addEventListener("change", renderAdminRequests);
+        }
         renderAdminRequests();
         renderAnnouncements("adminAnnouncements", true);
     } else {
+        renderResidentProfile();
         showRequests();
         renderAnnouncements("residentAnnouncements", false);
     }

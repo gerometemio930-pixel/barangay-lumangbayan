@@ -9,8 +9,11 @@ const app = express();
 const root = __dirname;
 const storeDirectory = path.join(root, ".private-data");
 const storePath = path.join(storeDirectory, "accounts.json");
-const port = Number(process.env.PORT || 3000);
+const defaultPort = Number(process.env.PORT || 3000);
+let activePort = defaultPort;
 const resetTokenLifetime = 30 * 60 * 1000;
+const defaultAdminEmail = String(process.env.DEFAULT_ADMIN_EMAIL || "admin@barangay.local").trim().toLowerCase();
+const defaultAdminPassword = process.env.DEFAULT_ADMIN_PASSWORD || "Admin12345";
 
 app.use(express.json({ limit: "10kb" }));
 
@@ -54,7 +57,7 @@ async function verifyPassword(password, account) {
 async function smtpTransport() {
     const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
     if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !process.env.SMTP_FROM) {
-        throw new Error("Password reset email is not configured. Set the SMTP environment variables and try again.");
+        return null;
     }
     const { createTransport } = await import("nodemailer");
     return createTransport({
@@ -67,6 +70,63 @@ async function smtpTransport() {
 
 function validEmail(email) {
     return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function buildResetUrl(token) {
+    const baseUrl = process.env.APP_BASE_URL || `http://localhost:${activePort}`;
+    const resetUrl = new URL("/", baseUrl);
+    resetUrl.searchParams.set("resetToken", token);
+    return resetUrl.toString();
+}
+
+function startServer() {
+    const portsToTry = Array.from(new Set([
+        defaultPort,
+        ...Array.from({ length: 20 }, (_, index) => defaultPort + index + 1)
+    ]));
+
+    return new Promise((resolve, reject) => {
+        const attempt = (index) => {
+            const portToUse = portsToTry[index];
+            const server = app.listen(portToUse, () => {
+                activePort = server.address().port;
+                console.log(`Barangay portal listening on http://localhost:${activePort}`);
+                resolve(server);
+            });
+
+            server.once("error", error => {
+                if (error && error.code === "EADDRINUSE" && index < portsToTry.length - 1) {
+                    console.warn(`Port ${portToUse} is busy. Retrying on http://localhost:${portsToTry[index + 1]}.`);
+                    attempt(index + 1);
+                    return;
+                }
+                reject(error);
+            });
+        };
+
+        attempt(0);
+    });
+}
+
+async function ensureDefaultAdmin() {
+    const store = await readStore();
+    const adminExists = store.accounts.some(account =>
+        String(account?.email || "").trim().toLowerCase() === defaultAdminEmail
+    );
+
+    if (adminExists) return;
+
+    const credentials = await hashPassword(defaultAdminPassword);
+    store.accounts.push({
+        username: "Administrator",
+        email: defaultAdminEmail,
+        role: "admin",
+        salt: credentials.salt,
+        passwordHash: credentials.hash,
+        createdAt: new Date().toISOString()
+    });
+    await writeStore(store);
+    console.log(`Default admin account ready: ${defaultAdminEmail} / ${defaultAdminPassword}`);
 }
 
 app.post("/api/register", async (request, response, next) => {
@@ -128,34 +188,45 @@ app.post("/api/forgot-password", async (request, response, next) => {
         const email = String(request.body.email || "").trim().toLowerCase();
         if (!validEmail(email)) return response.status(400).json({ error: "Enter a valid email address." });
 
-        const mailer = await smtpTransport();
         const store = await readStore();
         store.resetTokens = store.resetTokens.filter(item => item.expiresAt > Date.now());
         const account = store.accounts.find(item => item.email === email);
 
         if (account) {
             const token = crypto.randomBytes(32).toString("hex");
-            const baseUrl = process.env.APP_BASE_URL || `http://localhost:${port}`;
-            const resetUrl = new URL("/", baseUrl);
-            resetUrl.searchParams.set("resetToken", token);
+            const resetUrl = buildResetUrl(token);
             store.resetTokens.push({
                 tokenHash: crypto.createHash("sha256").update(token).digest("hex"),
                 email,
                 expiresAt: Date.now() + resetTokenLifetime
             });
             await writeStore(store);
-            try {
-                await mailer.sendMail({
-                    from: process.env.SMTP_FROM,
-                    to: email,
-                    subject: "Reset your Barangay Lumangbayan portal password",
-                    text: `Use this link within 30 minutes to reset your password: ${resetUrl.toString()}`,
-                    html: `<p>Use the link below within 30 minutes to reset your password.</p><p><a href="${resetUrl.toString()}">Reset your password</a></p>`
+
+            const mailer = await smtpTransport();
+            if (mailer) {
+                try {
+                    await mailer.sendMail({
+                        from: process.env.SMTP_FROM,
+                        to: email,
+                        subject: "Reset your Barangay Lumangbayan portal password",
+                        text: `Use this link within 30 minutes to reset your password: ${resetUrl}`,
+                        html: `<p>Use the link below within 30 minutes to reset your password.</p><p><a href="${resetUrl}">Reset your password</a></p>`
+                    });
+                } catch (error) {
+                    console.warn("SMTP email reset failed, falling back to demo reset link.", error.message);
+                    return response.json({
+                        message: "Password reset link ready for demo testing. Use the link below to continue.",
+                        resetLink: resetUrl,
+                        resetToken: token
+                    });
+                }
+            } else {
+                console.warn(`Demo mode reset link generated for ${email}: ${resetUrl}`);
+                return response.json({
+                    message: "Password reset link ready for demo testing. Use the link below to continue.",
+                    resetLink: resetUrl,
+                    resetToken: token
                 });
-            } catch (error) {
-                store.resetTokens = store.resetTokens.filter(item => item.email !== email);
-                await writeStore(store);
-                throw error;
             }
         }
 
@@ -216,4 +287,11 @@ app.use((error, request, response, next) => {
     });
 });
 
-app.listen(port, () => console.log(`Barangay portal listening on http://localhost:${port}`));
+ensureDefaultAdmin()
+    .then(() => {
+        return startServer();
+    })
+    .catch(error => {
+        console.error("Failed to initialize the portal.", error);
+        process.exit(1);
+    });

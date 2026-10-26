@@ -62,13 +62,21 @@ function togglePassword(id, button) {
 }
 
 async function apiRequest(path, body) {
-    const response = await fetch(path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-    });
+    let response;
+    try {
+        response = await fetch(path, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+    } catch (error) {
+        throw new Error("The server is unavailable right now. Please start the app or open the correct page.");
+    }
+
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || "The request could not be completed.");
+    if (!response.ok) {
+        throw new Error(result.error || "The request could not be completed. Please try again.");
+    }
     return result;
 }
 
